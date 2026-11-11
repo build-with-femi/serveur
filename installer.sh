@@ -273,10 +273,10 @@ dokploy() {
 verifier_dokploy() {
   local ko=0
   for service in dokploy dokploy-postgres; do
-    if docker service ls --format '{{.Name}} {{.Replicas}}' | grep -qx "$service 1/1"; then ok "Service $service 1/1"
+    if grep -qx "$service 1/1" <<< "$(docker service ls --format '{{.Name}} {{.Replicas}}')"; then ok "Service $service 1/1"
     else info "${ROUGE}Service $service pas prêt${FIN}"; ko=1; fi
   done
-  if docker ps --format '{{.Names}}' | grep -qx dokploy-traefik; then ok "Traefik tourne"
+  if grep -qx dokploy-traefik <<< "$(docker ps --format '{{.Names}}')"; then ok "Traefik tourne"
   else info "${ROUGE}Traefik ne tourne pas${FIN}"; ko=1; fi
   local c conf
   for c in $(docker ps --format '{{.Names}}'); do
@@ -315,7 +315,7 @@ finaliser() {
     200|307|302) ok "https://$domaine répond ($code) avec un certificat valide" ;;
     *) arret "https://$domaine ne répond pas correctement (code « $code »). Le port 3000 reste ouvert : vérifie le domaine dans le panneau." ;;
   esac
-  if docker service inspect dokploy --format '{{json .Endpoint.Ports}}' | grep -q '"PublishedPort":3000'; then
+  if grep -q '"PublishedPort":3000' <<< "$(docker service inspect dokploy --format '{{json .Endpoint.Ports}}')"; then
     docker service update --publish-rm "published=3000,target=3000,mode=host" dokploy >> "$JOURNAL" 2>&1
   fi
   ufw --force delete allow 3000/tcp >> "$JOURNAL" 2>&1 || true
@@ -332,8 +332,9 @@ finaliser() {
 
 verifier() {
   titre "État du serveur"
-  sshd -T | grep -qx 'passwordauthentication no' && ok "SSH : mot de passe refusé" || info "${ROUGE}SSH : mot de passe accepté${FIN}"
-  ufw status | grep -q 'Status: active' && ok "Pare-feu actif" || info "${ROUGE}Pare-feu inactif${FIN}"
+  # Pas de « sshd -T | grep -q » : avec pipefail, grep qui s'arrête tôt fait échouer le tuyau (SIGPIPE).
+  grep -qx 'passwordauthentication no' <<< "$(sshd -T 2>/dev/null)" && ok "SSH : mot de passe refusé" || info "${ROUGE}SSH : mot de passe accepté${FIN}"
+  grep -q 'Status: active' <<< "$(ufw status)" && ok "Pare-feu actif" || info "${ROUGE}Pare-feu inactif${FIN}"
   fail2ban-client status sshd > /dev/null 2>&1 && ok "fail2ban actif" || info "${ROUGE}fail2ban inactif${FIN}"
   [ "$(sysctl -n vm.swappiness)" = "10" ] && ok "swappiness 10" || info "swappiness $(sysctl -n vm.swappiness)"
   command -v docker > /dev/null && verifier_dokploy || true

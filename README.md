@@ -24,6 +24,9 @@ Dans la gestion DNS de ton domaine (chez Hostinger : Noms de domaine, ton domain
 | --- | --- | --- | --- |
 | A | `panneau` | `IP_DU_SERVEUR` | 300 |
 | A | `@` | `IP_DU_SERVEUR` | 300 |
+| A | `*` | `IP_DU_SERVEUR` | 300 |
+
+La ligne `*` couvre tous les sous-domaines (`boutique.tondomaine.com`, `admin.tondomaine.com`...) : tu les crées ensuite directement dans le panneau, sans revenir chez ton registrar. Chaque sous-domaine reçoit son propre certificat HTTPS automatiquement.
 
 S'il existe déjà un A `@` (souvent une page de parking), **modifie-le** au lieu d'en ajouter un deuxième. Supprime tout enregistrement **AAAA** sur `@` ou `panneau` : il empêcherait le certificat HTTPS. Ne touche pas aux autres enregistrements (emails, TXT).
 
