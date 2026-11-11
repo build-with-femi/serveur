@@ -18,7 +18,8 @@ ETAT_DIR=/var/lib/bwf
 ETAT="$ETAT_DIR/etapes"
 JOURNAL=/var/log/bwf-installation.log
 SAUVEGARDE=/root/bwf-backup
-MEMOIRE_MIN_MO="${BWF_MEMOIRE_MIN_MO:-3500}"   # 4 Go demandés ; le serveur de test met 1800
+MEMOIRE_MIN_MO=1800      # 2 Go : le minimum de Dokploy (un serveur de 2 Go affiche environ 1 970 Mo)
+MEMOIRE_CONSEIL_MO=3500  # 4 Go : conseillé dès que plusieurs outils tournent
 DISQUE_MIN_GO="${BWF_DISQUE_MIN_GO:-30}"
 export DEBIAN_FRONTEND=noninteractive
 
@@ -77,7 +78,8 @@ prerequis() {
   memoire_mo=$(awk '/MemTotal/ {print int($2/1024)}' /proc/meminfo)
   disque_go=$(df -BG --output=size / | tail -1 | tr -dc '0-9')
   info "Mémoire : ${memoire_mo} Mo. Disque : ${disque_go} Go."
-  [ "$memoire_mo" -ge "$MEMOIRE_MIN_MO" ] || arret "il faut au moins 4 Go de mémoire (trouvé ${memoire_mo} Mo). Prends l'offre au-dessus chez ton hébergeur."
+  [ "$memoire_mo" -ge "$MEMOIRE_MIN_MO" ] || arret "il faut au moins 2 Go de mémoire (trouvé ${memoire_mo} Mo). Prends l'offre au-dessus chez ton hébergeur."
+  [ "$memoire_mo" -ge "$MEMOIRE_CONSEIL_MO" ] || info "Moins de 4 Go : un outil tourne bien ; à partir de deux ou trois, passe à 4 Go."
   [ "$disque_go" -ge "$DISQUE_MIN_GO" ] || info "Disque sous ${DISQUE_MIN_GO} Go : il faudra nettoyer les images Docker régulièrement."
 
   if ! fait dokploy; then

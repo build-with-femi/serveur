@@ -6,7 +6,7 @@ Testé sur Ubuntu 24.04, chez mvps.net, en novembre 2026.
 
 ## Ce qu'il te faut
 
-- Un serveur VPS **Ubuntu 24.04** avec **au moins 4 Go de mémoire**, 2 processeurs et 40 Go de disque.
+- Un serveur VPS **Ubuntu 24.04** avec **au moins 2 Go de mémoire** et 25 Go de disque. 4 Go et 40 Go de disque sont conseillés dès que plusieurs outils tournent.
 - Un nom de domaine. Tu y crées un enregistrement **A** `panneau` qui pointe vers l'adresse IP du serveur.
 - Un ordinateur sous Windows, Mac ou Linux. Rien à installer : le terminal suffit.
 
@@ -37,6 +37,8 @@ ssh root@IP_DU_SERVEUR
 curl -fsSL https://raw.githubusercontent.com/build-with-femi/serveur/main/installer.sh -o installer.sh
 bash installer.sh
 ```
+
+Colle ces commandes une ligne à la fois : la connexion `ssh` doit être ouverte avant de lancer les suivantes.
 
 Le script fait tout seul :
 
