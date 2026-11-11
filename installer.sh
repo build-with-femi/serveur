@@ -35,7 +35,9 @@ arret()   { printf '\n  %sArrêt :%s %s\n\n' "$ROUGE$GRAS" "$FIN" "$*" >&2; jour
 
 # Les questions passent par le terminal, même quand le script arrive par un tuyau.
 demander() {
-  local question="$1" reponse
+  local question="$1" reponse _vide
+  # Vide ce qui a pu être tapé ou collé d'avance : une question n'accepte qu'une réponse donnée après elle.
+  while read -r -t 0 < /dev/tty; do read -r -t 1 _vide < /dev/tty || break; done
   printf '\n  %s%s%s ' "$GRAS" "$question" "$FIN" > /dev/tty
   read -r reponse < /dev/tty || reponse=""
   journal "QUESTION $question -> $reponse"
